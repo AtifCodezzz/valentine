@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Will you be my Valentine?</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+  <style>
+    :root {
+      --pink: #F075AE;
+      --purple: #B153D7;
+      --card: rgba(255,255,255,0.35);
+      --white: #fff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100svh;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(circle at top, var(--pink), var(--purple));
+      font-family: "Poppins", system-ui, sans-serif;
+      overflow: hidden;
+      padding: 16px;
+    }
+
+    #confettiCanvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    .card {
+      width: min(720px, 92vw);
+      padding: 30px 24px;
+      background: var(--card);
+      backdrop-filter: blur(18px);
+      border-radius: 26px;
+      text-align: center;
+      box-shadow: 0 30px 80px rgba(0,0,0,.25);
+      animation: float 4s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%,100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    h1 {
+      font-size: clamp(28px, 4vw, 46px);
+      color: var(--white);
+      margin: 14px 0 20px;
+      text-shadow: 0 6px 20px rgba(0,0,0,.25);
+    }
+
+    .button-zone {
+      position: relative;
+      width: min(520px, 92%);
+      height: 160px;
+      margin: 0 auto;
+    }
+
+    button {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      padding: 16px 30px;
+      font-size: 18px;
+      font-weight: 800;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 14px 30px rgba(0,0,0,.25);
+      transition: transform .15s ease, background .15s ease;
+    }
+
+    #yesBtn {
+      left: 16%;
+      background: linear-gradient(135deg, var(--pink), var(--purple));
+      color: white;
+    }
+
+    #yesBtn:hover {
+      transform: translateY(-50%) scale(1.1);
+    }
+
+    #noBtn {
+      left: 64%;
+      background: rgba(255,255,255,.85);
+      color: #222;
+    }
+
+    .hint {
+      margin-top: 12px;
+      font-size: 14px;
+      color: white;
+      opacity: .8;
+    }
+
+    .result {
+      display: none;
+      margin-top: 20px;
+      animation: pop .4s ease;
+    }
+
+    @keyframes pop {
+      from { transform: scale(.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .result h2 {
+      font-size: clamp(32px, 5vw, 50px);
+      color: white;
+    }
+
+    .fireworks {
+      width: min(380px, 90vw);
+      border-radius: 18px;
+      box-shadow: 0 20px 50px rgba(0,0,0,.35);
+    }
+  </style>
+</head>
+
+<body>
+<canvas id="confettiCanvas"></canvas>
+
+<main class="card">
+  <h1>Will you be my Valentine? 💖</h1>
+
+  <section class="button-zone" id="zone">
+    <button id="yesBtn">Yes 💘</button>
+    <button id="noBtn">No 🙈</button>
+  </section>
+
+  <div class="hint" id="hint">Try pressing “No” if you dare 😈</div>
+
+  <section class="result" id="result">
+    <h2>YAY! 🎉💜</h2>
+    <img class="fireworks"
+      src="https://media.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif"
+      alt="Fireworks" />
+  </section>
+</main>
+
+<script>
+  const zone = document.getElementById("zone");
+  const yesBtn = document.getElementById("yesBtn");
+  const noBtn = document.getElementById("noBtn");
+  const result = document.getElementById("result");
+  const hint = document.getElementById("hint");
+  const canvas = document.getElementById("confettiCanvas");
+
+  const confettiInstance = confetti.create(canvas, { resize: true, useWorker: true });
+
+  let yesScale = 1;
+
+  function growYes() {
+    yesScale = Math.min(2.4, yesScale + 0.12);
+    yesBtn.style.transform = `translateY(-50%) scale(${yesScale})`;
+  }
+
+  function moveNo(x, y) {
+    const z = zone.getBoundingClientRect();
+    const b = noBtn.getBoundingClientRect();
+
+    let nx = Math.random() * (z.width - b.width);
+    let ny = Math.random() * (z.height - b.height);
+
+    noBtn.style.left = nx + "px";
+    noBtn.style.top = ny + "px";
+    noBtn.style.transform = "none";
+
+    growYes();
+  }
+
+  zone.addEventListener("pointermove", e => {
+    const b = noBtn.getBoundingClientRect();
+    const d = Math.hypot(
+      (b.left + b.width / 2) - e.clientX,
+      (b.top + b.height / 2) - e.clientY
+    );
+    if (d < 150) moveNo(e.clientX, e.clientY);
+  });
+
+  yesBtn.addEventListener("click", () => {
+    zone.style.display = "none";
+    hint.style.display = "none";
+    result.style.display = "block";
+
+    confettiInstance({
+      particleCount: 300,
+      spread: 140,
+      origin: { x: 0.5, y: 0.6 },
+      colors: ["#F075AE", "#B153D7", "#ffffff"]
+    });
+  });
+</script>
+</body>
+</html>
